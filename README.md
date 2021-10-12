@@ -1,4 +1,4 @@
-LCAjava: For my familiar programming language I chose java. I researched various solutions based on my experience with binary search trees and I settled on the one linked below.
+LCAjava: For my familiar programming language I chose java. I researched various solutions based on my experience with binary search trees and I settled on the one linked below. My prefered way of running unit tests is java is through eclipse.
 
 Testing instructions:
 Create a new java project in eclipse
