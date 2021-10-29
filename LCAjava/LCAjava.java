@@ -1,83 +1,114 @@
-// Code is from geeksforgeeks contributed by Sreenivasulu Rayanki: https://www.geeksforgeeks.org/lowest-common-ancestor-binary-tree-set-1/
+// Code is has been modified from algs4.cs.princeton.edu 
 
-import java.util.ArrayList;
-import java.util.List;
-
-// A Binary Tree node
-class Node {
-	int data;
-	Node left, right;
-
-	Node(int value) {
-		data = value;
-		left = right = null;
-	}
-}
+import java.io.*;
+import java.util.*;
 
 public class LCAjava
 {
-
-	Node root;
-	private List<Integer> path1 = new ArrayList<>();
-	private List<Integer> path2 = new ArrayList<>();
-
-	// Finds the path from root node to given root of the tree.
-	int findLCA(int n1, int n2) {
-		path1.clear();
-		path2.clear();
-		return findLCAInternal(root, n1, n2);
-	}
-
-	private int findLCAInternal(Node root, int n1, int n2) {
-
-		if (!findPath(root, n1, path1) || !findPath(root, n2, path2)) {
-			System.out.println((path1.size() > 0) ? "n1 is present" : "n1 is missing");
-			System.out.println((path2.size() > 0) ? "n2 is present" : "n2 is missing");
+    private static int V = 0;           // number of vertices in this digraph
+    private int E;                 // number of edges in this digraph
+    private Bag<Integer>[] adj;    // adj[v] = adjacency list for vertex v
+    private int[] indegree;        // indegree[v] = indegree of vertex v
+    
+    public LCAjava(int V) {
+        if (V < 0) throw new IllegalArgumentException("Number of vertices in a Digraph must be non-negative");
+        this.V = V;
+        
+        this.E = 0;
+        indegree = new int[V];
+        adj = (Bag<Integer>[]) new Bag[V];
+        for (int v = 0; v < V; v++) {
+            adj[v] = new Bag<Integer>();
+        }
+    }
+    public int V() {
+        return V;
+    }  
+    
+    public int E() {
+        return E;
+    }
+    
+    public Bag<Integer> adj(int v) {
+        return adj[v];
+    }  
+	    
+    public void addEdge(int v, int w) {
+        adj[v].add(w);
+        indegree[w]++;
+        E++;
+    }
+    
+    
+    public static int getLCA(LCAjava G, int s, int z) {
+    	System.out.println("VCHECK: " + V);
+    	if(s >= V || z  >= V) return -1;
+    	
+    	Stack<Integer> pathS = new Stack<Integer>();
+    	Stack<Integer> pathZ = new Stack<Integer>();
+    	
+		//Get the nodes that have a path to s
+		for (int v = 0; v < G.V(); v++) {
+			System.out.println("v: " + v);
+			BreadthFirstDirectedPaths bfs = new BreadthFirstDirectedPaths(G, v);
+            if (bfs.hasPathTo(s) && s != v) {
+                pathS.push(v);
+                System.out.println(v + " has path to " + s);
+                System.out.printf("%d to %d (%d):  ", s, v, bfs.distTo(v));
+                for (int x : bfs.pathTo(v)) {
+                    if (x == s) System.out.print(x);
+                    else        System.out.print("->" + x);
+                }
+                System.out.println();
+            }
+        }
+		
+		//Get the nodes that have a path to z
+		for (int v = 0; v < V; v++) {
+			BreadthFirstDirectedPaths bfs = new BreadthFirstDirectedPaths(G, v);
+            if (bfs.hasPathTo(z) && z != v) {
+                pathZ.push(v);
+                System.out.println();
+            }
+        }
+		
+		System.out.println("PathS: " + Arrays.toString(pathS.toArray()));
+		System.out.println("PathZ: " + Arrays.toString(pathZ.toArray()));
+		
+		if(pathZ.isEmpty()||pathS.isEmpty()) {
 			return -1;
 		}
-
-		int i;
-		for (i = 0; i < path1.size() && i < path2.size(); i++) {
-			
-		// System.out.println(path1.get(i) + " " + path2.get(i));
-			if (!path1.get(i).equals(path2.get(i)))
-				break;
+		else {
+			int sSize  = pathS.size();
+			int zSize  = pathZ.size();
+			//if there is a path from x to s and x to z, the most recent x is the LCA
+			for (int i = 0; i < sSize; i++) {
+				int S = pathS.pop();
+				Stack<Integer> pathZCopy = (Stack<Integer>) pathZ.clone();
+				
+				//System.out.println("S=" + S + " size=" +pathS.size());
+				//System.out.println("PathZ: " + Arrays.toString(pathZ.toArray()));
+				
+				for (int j = 0; j < zSize; j++) {
+					int Z = pathZCopy.pop();
+					//System.out.println("PathZ: " + Arrays.toString(pathZ.toArray()));
+					
+					//System.out.println("?" + S + "=" + Z);
+					if(S == Z) {
+						//System.out.println("LCA of " + s + " and " + z + " is "+ S + ".");
+						return S;
+					}
+					
+				}
+				
+			}
 		}
+		return -1;
 
-		return path1.get(i-1);
+
 	}
+
+
 	
-	// Finds the path from root node to given root of the tree, Stores the
-	// path in a vector path[], returns true if path exists otherwise false
-	private boolean findPath(Node root, int n, List<Integer> path)
-	{
-		// base case
-		if (root == null) {
-			return false;
-		}
-		
-		// Store this node . The node will be removed if
-		// not in path from root to n.
-		path.add(root.data);
-
-		if (root.data == n) {
-			return true;
-		}
-
-		if (root.left != null && findPath(root.left, n, path)) {
-			return true;
-		}
-
-		if (root.right != null && findPath(root.right, n, path)) {
-			return true;
-		}
-
-		// If not present in subtree rooted with root, remove root from
-		// path[] and return false
-		path.remove(path.size()-1);
-
-		return false;
-	}
-
 }
 
